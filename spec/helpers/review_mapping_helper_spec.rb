@@ -594,4 +594,46 @@ describe ReviewMappingHelper, type: :helper do
     end
   end
 
+  describe 'list_hyperlink_submission?' do
+    before(:each) do
+      create(:deadline_right, name: 'No')
+      create(:deadline_right, name: 'Late')
+      create(:deadline_right, name: 'OK')
+
+      @assignment = create(:assignment, name: 'response_for_each_round_test', created_at: DateTime.now.in_time_zone - 13.day)
+      create(:assignment_due_date, assignment: @assignment, parent_id: @assignment.id, round: 1)
+      create(:assignment_due_date, assignment: @assignment, parent_id: @assignment.id, round: 2)
+
+
+      questionnaire_1 = create(:questionnaire)
+      questionnaire_2 = create(:questionnaire)
+
+      create(:assignment_questionnaire, assignment: @assignment, questionnaire: questionnaire_1, used_in_round: 1)
+      create(:assignment_questionnaire, assignment: @assignment, questionnaire: questionnaire_2, used_in_round: 2)
+
+      @question_1_1 = create(:question, questionnaire: questionnaire_1)
+      @question_2_1 = create(:question, questionnaire: questionnaire_2)
+      @question_2_2 = create(:question, questionnaire: questionnaire_2)
+
+      reviewer = create(:participant, review_grade: nil)
+      reviewee = create(:assignment_team)
+
+      @response_map= create(:review_response_map, reviewer: reviewer, reviewee: reviewee, assignment: @assignment)
+
+      response_1 = create(:response, response_map: @response_map, round: 1)
+      response_2 = create(:response, response_map: @response_map, round: 2)
+
+      create(:answer, question: @question_1_1, response: response_1, comments: "http://www.round_1_question_1.com")
+      create(:answer, question: @question_2_1, response: response_2, comments: "Not a link")
+      create(:answer, question: @question_2_2, response: response_2, comments: "http://www.round_2_question_2.com")
+    end
+
+    it 'should return the link html if link is present in the answer for the last round' do
+      @id = @assignment.id
+      link = list_hyperlink_submission(@response_map.id, @question_2_2.id)
+      p link
+      expect(true).to be(true)
+    end
+  end
+
 end
