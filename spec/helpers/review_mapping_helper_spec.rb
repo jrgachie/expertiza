@@ -594,4 +594,41 @@ describe ReviewMappingHelper, type: :helper do
     end
   end
 
+  describe 'get_awarded_review_score' do
+    before(:each) do
+      create(:deadline_right, name: 'No')
+      create(:deadline_right, name: 'Late')
+      create(:deadline_right, name: 'OK')
+
+      @assignment = create(:assignment, name: 'get_awarded_review_score_test', created_at: DateTime.now.in_time_zone - 13.day)
+
+      create(:assignment_due_date, assignment: @assignment, parent_id: @assignment.id, round: 1)
+      #create(:assignment_due_date, assignment: @assignment, parent_id: @assignment.id, round: 2)
+
+      questionnaire_1 = create(:questionnaire)
+      create(:assignment_questionnaire, assignment: @assignment, questionnaire: questionnaire_1, used_in_round: 1)
+
+      question_1 = create(:question, questionnaire: questionnaire_1)
+      question_2 = create(:question, questionnaire: questionnaire_1)
+
+      reviewer = create(:participant, review_grade: nil)
+      reviewee = create(:assignment_team)
+      response_map = create(:review_response_map, reviewer: reviewer, reviewee: reviewee, assignment: @assignment)
+
+      response_1 = create(:response, response_map: response_map, round: 1)
+      #response_2 = create(:response, response_map: response_map, round: 2)
+
+      create(:answer, question: question_1, response: response_1)
+      create(:answer, question: question_2, response: response_1)
+    end
+
+
+    it 'should return the review scores' do
+      @review_scores = @assignment.compute_reviews_hash
+      p @review_scores
+      expect(true).to be(true)
+    end
+
+  end
+
 end
